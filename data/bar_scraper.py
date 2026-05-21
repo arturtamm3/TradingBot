@@ -48,27 +48,39 @@ def add_bars_to_db(ticker_id, bars, db_name, table_name):
 
 
 def fetch_bars(ticker_id, ticker_symbol, db_name, client, table_name):
-    end_date = datetime.now().date()
-    start_date = end_date - timedelta(days=710)
-  
-    try:
-        bars = client.list_aggs(
-            ticker=ticker_symbol,
-            multiplier=1,
-            timespan="minute", 
-            from_=start_date.strftime("%Y-%m-%d"),
-            to=end_date.strftime("%Y-%m-%d"),
-            limit=50000)
-
-        bars_list = [bar for bar in bars]
+    total_days = 720
+    chunk_size = 30
         
-        print(f"Fetched {len(bars_list)} bars for {ticker_symbol}")
-        add_bars_to_db(ticker_id, bars_list, db_name, table_name)
+    end_date = datetime.now().date()
+    start_date = end_date - timedelta(days=total_days)
     
-    except BadResponse as e:
-        print(f"Error fetching bars for {ticker_symbol}: {e}")
+    current_end = end_date
+    
+    while current_end > start_date:
+        current_start = current_end - timedelta(days=chunk_size)
+        if current_start < start_date:
+            current_start = start_date
+        
+        try:
+            bars = client.list_aggs(
+                ticker=ticker_symbol,
+                multiplier=1,
+                timespan="minute", 
+                from_=current_start.strftime("%Y-%m-%d"),
+                to=current_end.strftime("%Y-%m-%d"),
+                limit=50000)
 
-
+            bars_list = [bar for bar in bars]
+        
+            print(f"Fetched {len(bars_list)} bars for {ticker_symbol}")
+            add_bars_to_db(ticker_id, bars_list, db_name, table_name)
+    
+        except (BadResponse, Exception) as e:
+            print(f"Error fetching bars for {ticker_symbol}: {e}")
+            time.sleep(60)
+        
+        current_end = current_start - timedelta(days=1)
+        time.sleep(13)
 
 
 if __name__ == "__main__":
@@ -86,5 +98,4 @@ if __name__ == "__main__":
         print(f"--- Processing {index}/{total_stocks}: {ticker_symbol} ---")
         fetch_bars(ticker_id, ticker_symbol, db_name, client, table_name)
         print(f"--- Finished Stock {index}/{total_stocks}: {ticker_symbol} ---\n")
-        time.sleep(13)
 
