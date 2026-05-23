@@ -49,7 +49,7 @@ def add_bars_to_db(ticker_id, bars, db_name, table_name):
 
 def fetch_bars(ticker_id, ticker_symbol, db_name, client, table_name):
     total_days = 720
-    chunk_size = 30
+    chunk_size = 60
         
     end_date = datetime.now().date()
     start_date = end_date - timedelta(days=total_days)
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     API_KEY = os.getenv("POLYGON_API_KEY")
     client = RESTClient(API_KEY)
 
-    stocks = get_tickers(db_name, limit=190, offset=110)
+    stocks = get_tickers(db_name, limit=200, offset=300)
     total_stocks = len(stocks)
     print(f"Starting to fetch bars for {total_stocks} stocks...")
 
