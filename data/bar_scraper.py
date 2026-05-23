@@ -90,7 +90,7 @@ if __name__ == "__main__":
     API_KEY = os.getenv("POLYGON_API_KEY")
     client = RESTClient(API_KEY)
 
-    stocks = get_tickers(db_name, limit=1, offset=0)
+    stocks = get_tickers(db_name, limit=190, offset=110)
     total_stocks = len(stocks)
     print(f"Starting to fetch bars for {total_stocks} stocks...")
 
